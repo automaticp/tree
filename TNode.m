@@ -104,6 +104,24 @@ classdef TNode < handle
 			root_node = this;
 		end
 		
+		function bool = is_descendant_of(obj, other)
+			% Checks whether this node is a descendant of the specified node.
+			bool = false;
+			this = obj;
+			while this.has_parent
+				this = this.parent; % obj skips itself.
+				if this == other
+					bool = true;
+					return
+				end
+			end
+		end
+		
+		function bool = is_ancestor_of(obj, other)
+			% Checks whether this node is an ancestor of the specified node.
+			bool = is_descendant_of(other, obj);
+		end
+		
 		% Node Inspections
 		
 		function bool = has_parent(obj)
