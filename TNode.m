@@ -20,7 +20,7 @@ classdef TNode < handle
 			obj.ref_list.add_nodes(obj);
 		end
 		
-		% Child Attaching and Creation
+	% Child Attaching and Creation
 		
 		function obj = attach_child(obj, child)
 			% Attaches existing TNode object to this node as a child.
@@ -54,7 +54,7 @@ classdef TNode < handle
 			obj.attach_child(new_child);
 		end
 		
-		% Child Detaching
+	% Child Detaching
 		
 		function [obj, child] = detach_child(obj, child)
 			% Detaches specified child node from this node.
@@ -89,7 +89,7 @@ classdef TNode < handle
 			parent = obj.parent.detach_child(obj);			
 		end
 
-		% Node Relationships
+	% Node Relationships
 		
 		function root_node = root(obj)
 			% Returns the root node of the tree.
@@ -122,13 +122,15 @@ classdef TNode < handle
 			bool = is_descendant_of(other, obj);
 		end
 		
-		% Node Inspections
+	% Node Inspections
 		
 		function bool = has_parent(obj)
+			% Checks whether this node has a parent (i.e. is not root node)
 			bool = ~cellfun(@isempty, {obj.parent});
 		end
 		
 		function bool = has_children(obj)
+			% Checks whether this node has children (i.e. is not leaf node)
 			bool = ~cellfun(@isempty, {obj.children});
 		end
 		
@@ -142,7 +144,7 @@ classdef TNode < handle
 			bool = obj.ref_list == node.ref_list;
 		end
 		
-		% Search and Traversal
+	% Search and Traversal
 		
 		function nodes = find_if(obj, predicate)
 			% Finds nodes of the tree that satisfy the predicate.
@@ -175,7 +177,7 @@ classdef TNode < handle
 			end
 		end
 		
-		% Listing
+	% Listing
 		
 		function tree_list = list(obj)
 			% Lists all nodes in a tree.
@@ -195,7 +197,7 @@ classdef TNode < handle
 			nodes = find_if_from_this(obj, @(~)( true ));
 		end
 		
-		% Tree and Subtree Copying
+	% Tree and Subtree Copying
 		
 		function root_of_copy = copy(obj)
 			% Copies all the nodes in the tree starting from root.
@@ -241,9 +243,6 @@ classdef TNode < handle
 				root_of_copy.attach_child(child.copy_transform_from_this(transform));
 			end
 		end
-		
-		
-		
 		
 		
 	end
