@@ -180,6 +180,7 @@ classdef TNode < handle
 		function tree_list = list(obj)
 			% Lists all nodes in a tree.
 			%	Returns an array of all nodes in current tree structure.
+			%	The order of the elements in a list has no meaning.
 			%	Time complexity: Constant.
 			tree_list = obj.ref_list.list;
 		end
@@ -187,11 +188,63 @@ classdef TNode < handle
 		function nodes = list_from_this(obj)
 			% Lists all nodes of a subtree starting from this node.
 			%	Returns an array of all nodes in a subtree.
+			%	The order of the elements in a list has no meaning.
 			%	Time complexity: O(n), where n - number of elements in the subtree.
 			%	
 			%	Use find_if_from_this() to search for elements in a subtree directly.
 			nodes = find_if_from_this(obj, @(~)( true ));
 		end
+		
+		% Tree and Subtree Copying
+		
+		function root_of_copy = copy(obj)
+			% Copies all the nodes in the tree starting from root.
+			%	Performs a deep copy of all the nodes. Returns the root node of the copied tree.
+			%	The order of the nodes in 'children' array is preserved.	
+			root_of_copy = obj.root().copy_from_this();
+		end
+		
+		function root_of_copy = copy_from_this(obj)
+			% Copies all the nodes in the subtree starting from this node.
+			%	Performs a deep copy of all the nodes. Returns the root node of the copied tree.
+			%	The order of the nodes in 'children' array is preserved.	
+			root_of_copy = obj.copy_transform_from_this(@(x)( x ));
+		end
+		
+		function root_of_copy = copy_transform(obj, transform)
+			% Copies all the nodes in the tree starting from root node while transforming its data.
+			%	Performs a deep copy of all the nodes. Returns the root node of the copied tree.
+			%	Transformation is applied to the data of each node one-by-one in the form:
+			%		copy.data = transform(original.data)
+			%	The order of the nodes in 'children' array is preserved.	
+			%
+			%	Less memory intensive than copying the entire tree and then transforming each element.
+			root_of_copy = obj.root().copy_transform_from_this(transform);
+		end
+		
+		function root_of_copy = copy_transform_from_this(obj, transform)
+			% Copies all the nodes in the subtree starting from this node while transforming its data.
+			%	Performs a deep copy of all the nodes. Returns the root node of the copied tree.
+			%	Transformation is applied to the data of each node one-by-one in the form:
+			%		copy.data = transform(original.data)
+			%	The order of the nodes in 'children' array is preserved.	
+			%
+			%	Less memory intensive than copying the entire subtree and then transforming each element.
+			arguments
+				obj TNode
+				transform function_handle
+			end
+				
+			root_of_copy = TNode(transform(obj.data));
+			
+			for child = obj.children
+				root_of_copy.attach_child(child.copy_transform_from_this(transform));
+			end
+		end
+		
+		
+		
+		
 		
 	end
 	
