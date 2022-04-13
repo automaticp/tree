@@ -31,6 +31,9 @@ classdef TList < handle
 			indecies = ismember(obj.list, nodes);
 			assert(any(indecies), 'TList contains no specified nodes.');
 			
+			assert(sum(indecies) == length(nodes), ...
+				'TList contains only some of the specified nodes.');
+			
 			obj.list(indecies) = [];
 			
 		end
