@@ -22,30 +22,32 @@ classdef TNode < handle
 		
 	% Child Attaching and Creation
 		
-		function obj = attach_child(obj, child)
+		function [obj, new_child] = attach_child(obj, new_child)
 			% Attaches existing TNode object to this node as a child.
+			%	Returns this node and the attached child node.
 			arguments
 				obj	TNode
-				child (1,1) TNode
+				new_child (1,1) TNode
 			end
 			
-			assert(~obj.is_same_tree_as(child), ...
+			assert(~obj.is_same_tree_as(new_child), ...
 				'Tree already contains specified TNode instance.');
 			
-			assert(~child.has_parent(), ...
+			assert(~new_child.has_parent(), ...
 				'Specified TNode is not a root node. Detach it from parent first.');
 			
-			child.parent = obj;
-			obj.children(end + 1) = child;
+			new_child.parent = obj;
+			obj.children(end + 1) = new_child;
 			
-			obj.ref_list.add_nodes(child.ref_list.list); 
-			for node = child.ref_list.list
+			obj.ref_list.add_nodes(new_child.ref_list.list); 
+			for node = new_child.ref_list.list
 				node.ref_list = obj.ref_list;
 			end
 		end
 		
-		function obj = make_child(obj, data)
+		function [obj, new_child] = make_child(obj, data)
 			% Creates a new child TNode object with the specified data.
+			%	Returns this node and the new child node.
 			arguments
 				obj TNode
 				data = []
