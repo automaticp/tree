@@ -192,7 +192,7 @@ classdef TNode < handle
 		function nodes = list_from_this(obj)
 			% Lists all nodes of a subtree starting from this node.
 			%	Returns an array of all nodes in a subtree.
-			%	The order of the elements in a list has no meaning.
+			%	The order of the elements in a list is depth-first.
 			%	Time complexity: O(n), where n - number of elements in the subtree.
 			%	
 			%	Use find_if_from_this() to search for elements in a subtree directly.
@@ -247,9 +247,49 @@ classdef TNode < handle
 		end
 		
 		
+		function display_tree(obj, data_transform)
+			% Prints out the tree in a cascading format to the console.
+			%	The format of the output is:
+			%		[depth](child_number/total_children) <custom_string>
+			%	for node, from which this method was called, and
+			%		[depth](child_number/total_children) custom_string
+			%	for all other nodes.
+			%
+			%	The custom string by default is just "TNode" 
+			%	but can be a function of each node's data, as:
+			%		custom_string = data_transform(node.data);
+			%	if data_transform function is specified by the user.
+			arguments
+				obj TNode
+				data_transform function_handle = @(~)( "TNode" )
+			end
+			
+			obj.root().display_from_this_and_highlight_other(obj, data_transform);			
+		end
+		
+		function display_from_this(obj, data_transform)
+			% Prints out the subtree in a cascading format to the console starting from this node.
+			%	The format of the output is:
+			%		[depth](child number/total children) <custom_string>
+			%	for this node (root of the subtree) and
+			%		[depth](child number/total children) custom_string
+			%	for all other nodes.
+			%
+			%	The custom_string by default is just "TNode" 
+			%	but can be a function of each node's data, as:
+			%		custom_string = data_transform(node.data);
+			%	if data_transform function is specified by the user.
+			arguments
+				obj TNode
+				data_transform function_handle = @(~)( "TNode" )
+			end
+			
+			obj.display_from_this_and_highlight_other(obj, data_transform);	
+		end
+		
 	end
 	
-	methods (Access = private)		
+	methods (Access = private)
 		function n = depth_scalar(obj)
 			n = 0;
 			this = obj;
@@ -258,6 +298,52 @@ classdef TNode < handle
 				n = n + 1;
 			end
 		end
+		
+		function display_from_this_and_highlight_other(obj, highlight_node, data_transform)
+			arguments
+				obj TNode
+				highlight_node TNode
+				data_transform function_handle = @(~)( "TNode" )
+			end
+			
+			template_highlight_node = "%s[%d](%d/%d) %s\n";
+			template_this_node      = "%s[%d](%d/%d) <%s>\n";
+			
+			% Because list_from_this() does a depth-first search, 
+			% the order of elements in the returned list 
+			% defines the hierarchy by depth alone.
+			
+			ordered_list = obj.list_from_this(); 
+			
+			for node = ordered_list
+				
+				% Set position in children array and length of children array
+				if node.has_parent
+					siblings = node.parent.children;
+					num_siblings = length(siblings);
+					pos_in_siblings = find(siblings == node);
+				else
+					num_siblings = 1;
+					pos_in_siblings = 1;
+				end
+				
+				if node == highlight_node
+					template = template_this_node;
+				else
+					template = template_highlight_node;
+				end
+							
+				depth = node.depth();
+				
+				offset = repmat('    ', [1, depth]);
+				
+				fprintf(template, ...
+					offset, depth, pos_in_siblings, num_siblings, data_transform(node.data)); 
+				
+			end
+		end
+		
+		
 	end
 	
 end
