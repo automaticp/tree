@@ -246,6 +246,7 @@ classdef TNode < handle
 			end
 		end
 		
+	% Tree and Subtree Display
 		
 		function display_tree(obj, data_transform)
 			% Prints out the tree in a cascading format to the console.
