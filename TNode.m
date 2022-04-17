@@ -106,6 +106,59 @@ classdef TNode < handle
 			root_node = this;
 		end
 		
+		function descendant_node = descendant(obj, vararg_child_numbers)
+			% Returns the descendant node at the specified child number sequence.
+			%	Calls: 
+			%		t.descendant(1, 2, 3, ...)
+			%		t.descendant([1, 2, 3, ...])
+			%		t.descendant(1, [2, 3], ...)
+			%	produce the same result and are equivalent to:
+			%		t.children(1).children(2).children(3)...
+			arguments
+				obj TNode
+			end
+			arguments (Repeating)
+				vararg_child_numbers double {mustBePositive, mustBeInteger}
+			end
+			
+			child_nums = cell2mat(vararg_child_numbers);
+			
+			this = obj;
+			for child_id = 1:length(child_nums)
+				child_num = child_nums(child_id);
+				try
+					this = this.children(child_num);
+				catch ME
+					msg = sprintf( ...
+						'Node at [this%s%s] does not have a child with index %d.', ...
+						repmat(' -> ', [1, this ~= obj]), ...
+						strjoin(strsplit(num2str(child_nums(1:child_id - 1))), ' -> '), child_num);
+					new_exception = MException('MATLAB:TNode:no_valid_descendant', msg);
+					ME = addCause(ME, new_exception);
+					rethrow(ME)
+				end
+			end
+			descendant_node = this;
+		end
+		
+		function ancestor_node = ancestor(obj, generation)
+			% Returns the ancestor node specified number of generations away from this.
+			%	Equivalent to repeatedly calling 
+			%		t.parent.parent....
+			%	'generation' times.
+			arguments 
+				obj TNode
+				generation (1,1) double {mustBeInteger, mustBePositive}
+			end
+			
+			this = obj;
+			for i = 1:generation
+				assert(this.has_parent, 'Ancestor at generation %d from this has no parent.', i - 1);
+				this = this.parent;
+			end
+			ancestor_node = this;
+		end
+		
 		function bool = is_descendant_of(obj, other)
 			% Checks whether this node is a descendant of the specified node.
 			bool = false;
