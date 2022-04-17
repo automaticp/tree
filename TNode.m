@@ -288,19 +288,19 @@ classdef TNode < handle
 			obj.display_from_this_and_highlight_other(obj, data_transform);	
 		end
 		
-	end
-	
-	methods (Access = private)
-		function n = depth_scalar(obj)
-			n = 0;
-			this = obj;
-			while this.has_parent
-				this = this.parent;
-				n = n + 1;
-			end
-		end
-		
 		function display_from_this_and_highlight_other(obj, highlight_node, data_transform)
+			% Prints out the subtree in a cascading format to the console starting from this node
+			% and highlights the specified node.
+			%	The format of the output is:
+			%		[depth](child number/total children) <custom_string>
+			%	for highlighted node and
+			%		[depth](child number/total children) custom_string
+			%	for all other nodes.
+			%
+			%	The custom_string by default is just "TNode" 
+			%	but can be a function of each node's data, as:
+			%		custom_string = data_transform(node.data);
+			%	if data_transform function is specified by the user.
 			arguments
 				obj TNode
 				highlight_node TNode
@@ -312,7 +312,9 @@ classdef TNode < handle
 			
 			% Because list_from_this() does a depth-first search, 
 			% the order of elements in the returned list 
-			% defines the hierarchy by depth alone.
+			% defines the hierarchy by depth alone. 
+			% Listing ndoes sequentially and offseting each node by depth 
+			% is enough to display the tree in a cascading view.
 			
 			ordered_list = obj.list_from_this(); 
 			
@@ -333,7 +335,8 @@ classdef TNode < handle
 				else
 					template = template_highlight_node;
 				end
-							
+				
+				
 				depth = node.depth();
 				
 				offset = repmat('    ', [1, depth]);
@@ -345,6 +348,17 @@ classdef TNode < handle
 		end
 		
 		
+	end
+	
+	methods (Access = private)
+		function n = depth_scalar(obj)
+			n = 0;
+			this = obj;
+			while this.has_parent
+				this = this.parent;
+				n = n + 1;
+			end
+		end		
 	end
 	
 end
