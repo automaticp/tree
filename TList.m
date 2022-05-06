@@ -9,10 +9,10 @@ classdef TList < handle
 			arguments
 				nodes (1,:) TNode = TNode.empty()
 			end
-			obj.add_nodes(nodes);
+			obj.append_nodes(nodes);
 		end
 		
-		function add_nodes(obj, nodes)
+		function append_nodes(obj, nodes)
 			arguments
 				obj TList
 				nodes (1,:) TNode

@@ -17,7 +17,7 @@ classdef TNode < handle
 			end
 			obj.data = data;
 			obj.ref_list = TList();
-			obj.ref_list.add_nodes(obj);
+			obj.ref_list.append_nodes(obj);
 		end
 		
 	% Child Attaching and Creation
@@ -39,7 +39,7 @@ classdef TNode < handle
 			new_child.parent = obj;
 			obj.children(end + 1) = new_child;
 			
-			obj.ref_list.add_nodes(new_child.ref_list.list); 
+			obj.ref_list.append_nodes(new_child.ref_list.list); 
 			for node = new_child.ref_list.list
 				node.ref_list = obj.ref_list;
 			end
