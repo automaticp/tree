@@ -69,7 +69,7 @@ classdef TList < handle
                 'TList already contains some of the specified nodes.');
            
             index = obj.list == this; 
-            assert(any(index), 'TList has no specified node to insert before.'); 
+            assert(any(index), 'TList has no specified node to insert before/after.'); 
             
             pos = find(index);
 

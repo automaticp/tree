@@ -36,13 +36,26 @@ classdef TNode < handle
 			assert(~new_child.has_parent(), ...
 				'Specified TNode is not a root node. Detach it from parent first.');
 			
+            % In order to add elements to the ref_list while preserving depth-first order,
+            % we walk the subtree till the end and insert new nodes past the end of the subtree.
+            % I'm not exactrly sure whether this approach fails in certain edge cases or not.
+            % Could possibly just re-walk the entire tree each time using list_from_this(),
+            % would be safer, but a lot more expensive.
+            % Just to be sure for now, I've added an assert that checks if the resulting ref_list
+            % is the same as if you were to just walk through the tree. Time will tell, maybe.
+            ls = obj.list_from_this();
+            obj.ref_list.insert_after(ls(end), new_child.ref_list.list);
+
 			new_child.parent = obj;
 			obj.children(end + 1) = new_child;
-			
-			obj.ref_list.append_nodes(new_child.ref_list.list);
-			for node = new_child.ref_list.list
+            
+            for node = new_child.ref_list.list
 				node.ref_list = obj.ref_list;
-			end
+            end
+            
+            assert(all(obj.list() == obj.root().list_from_this()), ... 
+            ['Insertion of new nodes reslted in incorrect ordering in the referece list of the Tree. ', ...
+            'Contact the developer. Most likely, he`s a moron.']);
 		end
 		
 		function [obj, new_child] = make_child(obj, data)
@@ -237,7 +250,7 @@ classdef TNode < handle
 		function tree_list = list(obj)
 			% Lists all nodes in a tree.
 			%	Returns an array of all nodes in current tree structure.
-			%	The order of the elements in a list has no meaning.
+			%	The order of the elements in a list is depth-first.
 			%	Time complexity: Constant.
 			tree_list = obj.ref_list.list;
 		end
