@@ -39,7 +39,7 @@ classdef TNode < handle
 			new_child.parent = obj;
 			obj.children(end + 1) = new_child;
 			
-			obj.ref_list.append_nodes(new_child.ref_list.list); 
+			obj.ref_list.append_nodes(new_child.ref_list.list);
 			for node = new_child.ref_list.list
 				node.ref_list = obj.ref_list;
 			end
@@ -304,8 +304,10 @@ classdef TNode < handle
 		function display_tree(obj, data_transform)
 			% Prints out the tree in a cascading format to the console.
 			%	The format of the output is:
-			%		[depth](child_number/total_children) <custom_string>
-			%	for node, from which this method was called, and
+			%		[depth](child number/total children) <id/N|custom_string>
+			%	for nodes, from which this method was called
+            %   (where id and N are index and total number of called from nodes),
+            %   and
 			%		[depth](child_number/total_children) custom_string
 			%	for all other nodes.
 			%
@@ -314,11 +316,11 @@ classdef TNode < handle
 			%		custom_string = data_transform(node.data);
 			%	if data_transform function is specified by the user.
 			arguments
-				obj TNode
+				obj (1,:) TNode
 				data_transform function_handle = @(~)( "TNode" )
 			end
 			
-			obj.root().display_from_this_and_highlight_other(obj, data_transform);			
+			obj(1).root().display_from_this_and_highlight_others(obj, data_transform);			
 		end
 		
 		function display_from_this(obj, data_transform)
@@ -334,19 +336,21 @@ classdef TNode < handle
 			%		custom_string = data_transform(node.data);
 			%	if data_transform function is specified by the user.
 			arguments
-				obj TNode
+				obj (1,1) TNode
 				data_transform function_handle = @(~)( "TNode" )
 			end
 			
-			obj.display_from_this_and_highlight_other(obj, data_transform);	
+			obj.display_from_this_and_highlight_others(obj, data_transform);	
 		end
 		
-		function display_from_this_and_highlight_other(obj, highlight_node, data_transform)
+		function display_from_this_and_highlight_others(obj, highlight_nodes, data_transform)
 			% Prints out the subtree in a cascading format to the console starting from this node
-			% and highlights the specified node.
+			% and highlights specified nodes.
 			%	The format of the output is:
-			%		[depth](child number/total children) <custom_string>
-			%	for highlighted node and
+			%		[depth](child number/total children) <id/N|custom_string>
+			%	for highlighted nodes 
+            %   (where id and N are index and total number of highlighted nodes) 
+            %   and
 			%		[depth](child number/total children) custom_string
 			%	for all other nodes.
 			%
@@ -356,17 +360,22 @@ classdef TNode < handle
 			%	if data_transform function is specified by the user.
 			arguments
 				obj TNode
-				highlight_node TNode
+				highlight_nodes (1,:) TNode
 				data_transform function_handle = @(~)( "TNode" )
-			end
+            end
 			
-			template_highlight_node = "%s[%d](%d/%d) %s\n";
-			template_this_node      = "%s[%d](%d/%d) <%s>\n";
-			
+            template_prefix                 = "%s[%d](%d/%d)";
+            
+			template_node                   = "%s %s\n";
+			template_highlight_node         = "%s <%d/%d|%s>\n";
+			template_highlight_node_single  = "%s <%s>\n";
+            
+            highlight_num = length(highlight_nodes);
+            
 			% Because list_from_this() does a depth-first search, 
 			% the order of elements in the returned list 
 			% defines the hierarchy by depth alone. 
-			% Listing ndoes sequentially and offseting each node by depth 
+			% Listing nodes sequentially and offseting each node by depth 
 			% is enough to display the tree in a cascading view.
 			
 			ordered_list = obj.list_from_this(); 
@@ -374,28 +383,36 @@ classdef TNode < handle
 			for node = ordered_list
 				
 				% Set position in children array and length of children array
-				if node.has_parent
+                if node.has_parent
 					siblings = node.parent.children;
 					num_siblings = length(siblings);
 					pos_in_siblings = find(siblings == node);
 				else
 					num_siblings = 1;
 					pos_in_siblings = 1;
-				end
-				
-				if node == highlight_node
-					template = template_this_node;
-				else
-					template = template_highlight_node;
-				end
-				
-				
+                end
+                
 				depth = node.depth();
 				
 				offset = repmat('    ', [1, depth]);
+                
+                prefix = sprintf(template_prefix, offset, depth, pos_in_siblings, num_siblings);
+                user_string = data_transform(node.data);
+                
+                % Spaghetti
+                if ismember(node, highlight_nodes)
+                    if highlight_num == 1
+                        content = sprintf(template_highlight_node_single, prefix, user_string);
+                    else
+                        highlight_id = find(highlight_nodes == node);
+                        content = sprintf(template_highlight_node, prefix, ...
+                            highlight_id, highlight_num, user_string);
+                    end
+                else
+					content = sprintf(template_node, prefix, user_string);
+                end
 				
-				fprintf(template, ...
-					offset, depth, pos_in_siblings, num_siblings, data_transform(node.data)); 
+				fprintf(content); 
 				
 			end
 		end
