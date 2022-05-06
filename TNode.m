@@ -41,8 +41,8 @@ classdef TNode < handle
             % I'm not exactrly sure whether this approach fails in certain edge cases or not.
             % Could possibly just re-walk the entire tree each time using list_from_this(),
             % would be safer, but a lot more expensive.
-            % Just to be sure for now, I've added an assert that checks if the resulting ref_list
-            % is the same as if you were to just walk through the tree. Time will tell, maybe.
+            % Just to be sure for now, I've added a check for the resulting ref_list
+            % to be the same as if you were to just walk through the tree, with a warning if it fails. 
             ls = obj.list_from_this();
             obj.ref_list.insert_after(ls(end), new_child.ref_list.list);
 
@@ -53,9 +53,10 @@ classdef TNode < handle
 				node.ref_list = obj.ref_list;
             end
             
-            assert(all(obj.list() == obj.root().list_from_this()), ... 
-            ['Insertion of new nodes reslted in incorrect ordering in the referece list of the Tree. ', ...
-            'Contact the developer. Most likely, he`s a moron.']);
+            if ~all(obj.list() == obj.root().list_from_this())
+                warning(['Insertion of new nodes reslted in incorrect ordering in the referece list of the Tree. ', ...
+                    'Contact the developer. Most likely, he`s a moron.']);
+            end
 		end
 		
 		function [obj, new_child] = make_child(obj, data)
