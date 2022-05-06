@@ -263,8 +263,24 @@ classdef TNode < handle
 			%	
 			%	Use find_if_from_this() to search for elements in a subtree directly.
 			nodes = find_if_from_this(obj, @(~)( true ));
-		end
+        end
 		
+        function ancestors = list_ancestors(obj)
+            % Lists all ancestors of this node ordered by distance from this node.
+            ancestors = TNode.empty();
+            this = obj;
+			while this.has_parent
+                this = this.parent;
+                ancestors = [ancestors, this];
+			end
+        end
+        
+        function descendants = list_descendants(obj)
+            % Lists all descendants of this node with depth-first ordering.
+            descendants = obj.list_from_this();
+            descendants(descendants == obj) = [];
+        end
+        
 	% Tree and Subtree Copying
 		
 		function root_of_copy = copy(obj)
